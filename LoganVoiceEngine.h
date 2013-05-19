@@ -21,9 +21,9 @@ struct LoganCodec
     int rate;
 };
 
-//从网络读取数据
+//read data from net or file
 typedef int  (__stdcall *LoganReadStreamCallBack)(void *buf,int len);
-//采集的数据写到网络
+//write data to net or file
 typedef bool (__stdcall *LoganWriteStreamCallBack)(const void *buf,int len);
 
 class LOGAN_API LoganVoiceEngine
