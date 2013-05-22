@@ -1,3 +1,20 @@
+/*
+**Copyright (c) 2013 Calvin Cheung. All Rights Reserved.
+**
+**Use of this source code is governed by a BSD-style license.
+**
+**This is a simple wrapper for WebRTC. I used it in the Video Conference project.
+**
+**URL:https://github.com/calvingit/WebRTC_Wrapper/
+**
+**File: LoganVoiceEngineImpl.h
+**
+**Author: Calvin Cheung, Chinna.
+**
+**Update Date: 2013-5-21
+*/
+
+
 #ifndef __LOGAN_VOICE_ENGINE_IMPL_H__
 #define __LOGAN_VOICE_ENGINE_IMPL_H__
 
@@ -43,7 +60,7 @@ class LoganOutStream:public OutStream
 public:
     virtual bool Write(const void *buf,int len);
     LoganWriteStreamCallBack pWrite;
-  
+
     virtual ~LoganOutStream() {}
     LoganOutStream() {}
 };
@@ -114,11 +131,45 @@ public:
     virtual int LoganVoe_StartReceive(int channelid);
     virtual int LoganVoe_StartPlayout(int channelid);
     virtual int LoganVoe_StartSend(int channelid);
+    virtual int LoganVoe_StartRecordingMicrophone(LoganWriteStreamCallBack lwscb);
+
+    virtual int LoganVoe_StartRecordingMicrophone(const char* fileNameUTF8, 
+        LoganCodec* codec = NULL);
+
+    virtual int LoganVoe_StartPlayingFileLocally(int channelid,
+        LoganReadStreamCallBack lrscb);
+
+    virtual int LoganVoe_StartPlayingFileLocally(int channelid,
+        const char fileNameUTF8[1024],
+        int samplerate,//(8000, 16000, 32000)
+        bool loop = false);
+
+    virtual int LoganVoe_IsPlayingFileLocally(int channel);
+
+    virtual int LoganVoe_StartRecordingPlayout(int channel, const char* fileNameUTF8,
+        LoganCodec *codec = NULL);
+
+    virtual int LoganVoe_StartPlayingFileAsMicrophone(
+        int channel,
+        const char fileNameUTF8[1024],
+        int sampleRate,
+        bool loop = false ,
+        bool mixWithMicrophone = false);
+
+    virtual int LoganVoe_StartPlayingFileAsMicrophone(
+        int channel,
+        LoganReadStreamCallBack read,
+        int sampleRate,
+        bool mixWithMicrophone = false);
+
+    virtual int LoganVoe_StopPlayingFileAsMicrophone(int channel);
+
+    virtual int LoganVoe_IsPlayingFileAsMicrophone(int channel);
+
     virtual int LoganVoe_StopReceive(int channelid);
     virtual int LoganVoe_StopPlayout(int channelid);
     virtual int LoganVoe_StopSend(int channelid);
-    virtual int LoganVoe_StartRecordingMicrophone();
-    virtual int LoganVoe_StartPlayingFileLocally(int channelid);
+    virtual int LoganVoe_StopRecordingPlayout(int channel);
     virtual int LoganVoe_StopPlayingFileLocally(int channelid);
     virtual int LoganVoe_StopRecordingMicrophone();
 
@@ -132,8 +183,8 @@ public:
     virtual int LoganVoe_GetSystemOutputMute(bool &enabled);
     virtual int LoganVoe_SetSystemInputMute(bool enable);
     virtual int LoganVoe_GetSystemInputMute(bool& enabled);
+    virtual int LoganVoe_GetSpeechInputLevel(unsigned int& level);
+    virtual int LoganVoe_GetSpeechOutputLevel(int channel, unsigned int& level);
 
-    virtual int LoganVoe_SetCallBackFuncs(LoganReadStreamCallBack lrscb,
-        LoganWriteStreamCallBack lwscb);
 };
 #endif //__LOGAN_VOICE_ENGINE_IMPL_H__

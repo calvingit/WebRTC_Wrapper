@@ -1,12 +1,26 @@
+/*
+**Copyright (c) 2013 Calvin Cheung. All Rights Reserved.
+**
+**Use of this source code is governed by a BSD-style license.
+**
+**This is a simple wrapper for WebRTC. I used it in the Video Conference project.
+**
+**URL:https://github.com/calvingit/WebRTC_Wrapper/
+**
+**File: LoganVoiceEngineImpl.cpp
+**
+**Author: Calvin Cheung, Chinna.
+**
+**Update Date: 2013-5-21
+*/
 
 #include "LoganVoiceEngineImpl.h"
-
 
 #define VALIDATE                                       \
     if (res != 0){                                     \
     printf("##%s  %i:\n",__FILE__, __LINE__);          \
     printf("       %s  Called Error, ",__FUNCTION__);  \
-    printf("code: %i\n", base->LastError());      \
+    printf("code: %i\n", base->LastError());           \
     }
 
 
@@ -29,13 +43,13 @@ void LoganVoiceEngine::Destroy(LoganVoiceEngine* lve) {
 
 
 LoganVoiceEngineImpl::LoganVoiceEngineImpl():
-    m_voe(NULL),
-    base(NULL),
-    codec(NULL),
-    volume(NULL),
-    apm(NULL),
-    netw(NULL),
-    hardware(NULL)
+m_voe(NULL),
+base(NULL),
+codec(NULL),
+volume(NULL),
+apm(NULL),
+netw(NULL),
+hardware(NULL)
 {
 
 }
@@ -106,34 +120,34 @@ int LoganVoiceEngineImpl::LoganVoe_DeleteChannel(int channel)
 }
 int LoganVoiceEngineImpl::LoganVoe_SetSendDestination(int channelId, char * ip, int port)
 {/*
-    if (channelId < 0)
-    {
-        return -1;
-    }
-    if (ip.empty())
-    {
-        return -2;
-    }
+ if (channelId < 0)
+ {
+ return -1;
+ }
+ if (ip.empty())
+ {
+ return -2;
+ }
 
-    VoiceChannelTransport *voice_channel_transport(new VoiceChannelTransport(netw, channelId));
+ VoiceChannelTransport *voice_channel_transport(new VoiceChannelTransport(netw, channelId));
 
-    res = voice_channel_transport->SetSendDestination(ip, port);
-    VALIDATE;
-    //构建一对通道id和transport的关系
-    VoiceChanTrans vct;
-    vct.channelid = channelId;
-    vct.trans = (void *)voice_channel_transport;
-    vec_vct.push_back(vct);
-*/
+ res = voice_channel_transport->SetSendDestination(ip, port);
+ VALIDATE;
+ //构建一对通道id和transport的关系
+ VoiceChanTrans vct;
+ vct.channelid = channelId;
+ vct.trans = (void *)voice_channel_transport;
+ vec_vct.push_back(vct);
+ */
     return -1;
 }
 
 int LoganVoiceEngineImpl::LoganVoe_SetLocalReceiver(int channelId,int port)
 {
-   /* VoiceChannelTransport* p= (VoiceChannelTransport*)FindTransFromChannel(channelId);
+    /* VoiceChannelTransport* p= (VoiceChannelTransport*)FindTransFromChannel(channelId);
     if (p == NULL)
     {
-        return -1;
+    return -1;
     }
 
     res = p->SetLocalReceiver(port);
@@ -158,7 +172,7 @@ int LoganVoiceEngineImpl::LoganVoe_GetSpecCodec(int index, LoganCodec &lc)
     lc.plfreq = c.plfreq;
     lc.pltype = c.pltype;
     lc.rate = c.rate;
-    
+
     return res;
 }
 
@@ -213,7 +227,7 @@ int LoganVoiceEngineImpl::LoganVoe_GetRecordingDeviceName(int index, char nameUT
     char guid[DEVICE_MAX_LEN] = { 0 };
     res = hardware->GetRecordingDeviceName(index, nameUTF8, guidUTF8);
     VALIDATE;
-    
+
     return res;
 }
 
@@ -342,18 +356,98 @@ int LoganVoiceEngineImpl::LoganVoe_StopSend(int channelid)
     return res;
 }
 
-int LoganVoiceEngineImpl::LoganVoe_StartRecordingMicrophone()
+int LoganVoiceEngineImpl::LoganVoe_StartRecordingMicrophone(LoganWriteStreamCallBack lwscb)
 {
+    _outStream.pWrite = lwscb;
     res = file->StartRecordingMicrophone(&_outStream);
     VALIDATE;
     return res;
 }
-int LoganVoiceEngineImpl::LoganVoe_StartPlayingFileLocally(int channelid)
+
+int LoganVoiceEngineImpl::LoganVoe_StartRecordingMicrophone(const char* fileNameUTF8, 
+                                                            LoganCodec* codec)
 {
+    if (codec == NULL)
+    {
+        res = file->StartRecordingMicrophone(fileNameUTF8, NULL);
+    } 
+    else
+    {
+        CodecInst ci;
+        ci.channels = codec->channels;
+        ci.pacsize = codec->pacsize;
+        ci.plfreq = codec->plfreq;
+        ci.pltype = codec->pltype;
+        ci.rate = codec->rate;
+        memcpy(ci.plname, codec->plname, RTP_PAYLOAD_NAME_LEN);
+        res = file->StartRecordingMicrophone(fileNameUTF8, &ci);
+    }
+    VALIDATE;
+    return res;
+
+}
+
+int LoganVoiceEngineImpl::LoganVoe_StartPlayingFileLocally(int channelid,
+                                                           LoganReadStreamCallBack lrscb)
+{
+    _inStream.pRead = lrscb;
     res = file->StartPlayingFileLocally(channelid, &_inStream);
     VALIDATE;
     return res;
 }
+
+int LoganVoiceEngineImpl::LoganVoe_StartPlayingFileLocally(int channelid,
+                                                           const char fileNameUTF8[1024],
+                                                           int samplerate,//(8000, 16000, 32000)
+                                                           bool loop)
+{
+    FileFormats format;
+    switch(samplerate)
+    {
+    case 8000:format = kFileFormatPcm8kHzFile;break;
+    case 16000:format = kFileFormatPcm16kHzFile;break;
+    case 32000:format = kFileFormatPcm32kHzFile;break;
+    default:format = kFileFormatPcm16kHzFile;break;
+    }
+    res = file->StartPlayingFileLocally(channelid, fileNameUTF8, loop, format);
+    VALIDATE;
+    return res;
+}
+
+int LoganVoiceEngineImpl::LoganVoe_IsPlayingFileLocally(int channel)
+{
+    return file->IsPlayingFileLocally(channel);
+}
+
+int LoganVoiceEngineImpl::LoganVoe_StartRecordingPlayout(int channel, const char* fileNameUTF8,
+                                                         LoganCodec *codec)
+{
+    if (codec == NULL)
+    {
+        res = file->StartRecordingPlayout(channel,fileNameUTF8);
+    } 
+    else
+    {
+        CodecInst ci;
+        ci.channels = codec->channels;
+        ci.pacsize = codec->pacsize;
+        ci.plfreq = codec->plfreq;
+        ci.pltype = codec->pltype;
+        ci.rate = codec->rate;
+        memcpy(ci.plname, codec->plname, RTP_PAYLOAD_NAME_LEN);
+        res = file->StartRecordingPlayout(channel,fileNameUTF8, &ci);
+    }
+    VALIDATE;
+    return res;    
+}
+
+int LoganVoiceEngineImpl::LoganVoe_StopRecordingPlayout(int channel)
+{
+    res = file->StopRecordingPlayout(channel);
+    VALIDATE;
+    return res;
+}
+
 int LoganVoiceEngineImpl::LoganVoe_StopPlayingFileLocally(int channelid)
 {
     res = file->StopPlayingFileLocally(channelid);
@@ -405,19 +499,6 @@ int LoganVoiceEngineImpl::LoganVoe_SetSpeakerVolume(unsigned int vol)
     return vol;
 }
 
-int LoganVoiceEngineImpl::LoganVoe_SetCallBackFuncs(LoganReadStreamCallBack lrscb,
-                              LoganWriteStreamCallBack lwscb)
-{
-    if (lrscb == NULL || lwscb == NULL)
-    {
-        return -1;
-    }
-    _inStream.pRead = lrscb;
-    _outStream.pWrite = lwscb;
-    return 0;
-
-}
-
 int LoganVoiceEngineImpl::LoganVoe_GetInputMute(int channel, bool& enabled)
 {
     res = volume->GetInputMute(channel, enabled);
@@ -450,4 +531,73 @@ int LoganVoiceEngineImpl::LoganVoe_GetSystemInputMute(bool& enabled)
     res = volume->GetSystemInputMute(enabled);
     VALIDATE;
     return res;
+}
+
+int LoganVoiceEngineImpl::LoganVoe_GetSpeechInputLevel(unsigned int& level)
+{
+    res = volume->GetSpeechInputLevel(level);
+    VALIDATE;
+    return res;
+}
+
+int LoganVoiceEngineImpl::LoganVoe_GetSpeechOutputLevel(int channel, unsigned int& level)
+{
+    res = volume->GetSpeechOutputLevel(channel, level);
+    VALIDATE;
+    return res;
+}
+
+int LoganVoiceEngineImpl::LoganVoe_StartPlayingFileAsMicrophone(
+    int channel,
+    const char fileNameUTF8[1024],
+    int sampleRate,
+    bool loop,
+    bool mixWithMicrophone)
+{
+    FileFormats format;
+    switch(sampleRate)
+    {
+    case 8000:format = kFileFormatPcm8kHzFile;break;
+    case 16000:format = kFileFormatPcm16kHzFile;break;
+    case 32000:format = kFileFormatPcm32kHzFile;break;
+    default:format = kFileFormatPcm16kHzFile;break;
+    }
+    res = file->StartPlayingFileAsMicrophone(channel, fileNameUTF8, loop,
+        mixWithMicrophone,format);
+    VALIDATE;
+    return res;
+}
+
+
+int LoganVoiceEngineImpl::LoganVoe_StartPlayingFileAsMicrophone(
+    int channel,
+    LoganReadStreamCallBack read,
+    int sampleRate,
+    bool mixWithMicrophone)
+{
+    _inStream.pRead = read;
+    FileFormats format;
+    switch(sampleRate)
+    {
+    case 8000:format = kFileFormatPcm8kHzFile;break;
+    case 16000:format = kFileFormatPcm16kHzFile;break;
+    case 32000:format = kFileFormatPcm32kHzFile;break;
+    default:format = kFileFormatPcm16kHzFile;break;
+    }
+    res = file->StartPlayingFileAsMicrophone(channel, &_inStream, mixWithMicrophone,
+        format);
+    VALIDATE;
+    return res;
+}
+
+int LoganVoiceEngineImpl::LoganVoe_StopPlayingFileAsMicrophone(int channel)
+{
+    res = file->StopPlayingFileAsMicrophone(channel);
+    VALIDATE;
+    return res;
+}
+
+int LoganVoiceEngineImpl::LoganVoe_IsPlayingFileAsMicrophone(int channel)
+{
+    return file->IsPlayingFileAsMicrophone(channel);
 }
