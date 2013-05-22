@@ -133,7 +133,7 @@ int LoganVoiceEngineImpl::LoganVoe_SetSendDestination(int channelId, char * ip, 
 
  res = voice_channel_transport->SetSendDestination(ip, port);
  VALIDATE;
- //构建一对通道id和transport的关系
+ //锟斤拷锟斤拷一锟斤拷通锟斤拷id锟斤拷transport锟侥癸拷系
  VoiceChanTrans vct;
  vct.channelid = channelId;
  vct.trans = (void *)voice_channel_transport;
@@ -192,9 +192,7 @@ int LoganVoiceEngineImpl::LoganVoe_SetSendCodec(int channelid, LoganCodec lc)
 
 int LoganVoiceEngineImpl::LoganVoe_GetNumsOfCodec()
 {
-    res = codec->NumOfCodecs();
-    VALIDATE;
-    return res;
+    return codec->NumOfCodecs();
 }
 
 int LoganVoiceEngineImpl::LoganVoe_GetNumOfRecordingDevices()
