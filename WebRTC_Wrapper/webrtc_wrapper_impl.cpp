@@ -183,22 +183,10 @@ int LoganVoiceEngineImpl::LoganVoe_SetSendDestination(int channelId,const char *
         return index;
     }
 
-<<<<<<< HEAD:LoganVoiceEngineImpl.cpp
- res = voice_channel_transport->SetSendDestination(ip, port);
- VALIDATE;
- //����һ��ͨ��id��transport�Ĺ�ϵ
- VoiceChanTrans vct;
- vct.channelid = channelId;
- vct.trans = (void *)voice_channel_transport;
- vec_vct.push_back(vct);
- */
-    return -1;
-=======
     res = vec_vct[index].pTrans->SetSendDestination(ip, port);
     VALIDATE;
  
     return res;
->>>>>>> 添加channel_transport和示例:WebRTC_Wrapper/webrtc_wrapper_impl.cpp
 }
 
 int LoganVoiceEngineImpl::LoganVoe_SetLocalReceiver(int channelId,int port)
@@ -251,11 +239,7 @@ int LoganVoiceEngineImpl::LoganVoe_SetSendCodec(int channelid, LoganCodec lc)
 
 int LoganVoiceEngineImpl::LoganVoe_GetNumsOfCodec()
 {
-<<<<<<< HEAD:LoganVoiceEngineImpl.cpp
-    return codec->NumOfCodecs();
-=======
     return  codec->NumOfCodecs();
->>>>>>> 添加channel_transport和示例:WebRTC_Wrapper/webrtc_wrapper_impl.cpp
 }
 
 int LoganVoiceEngineImpl::LoganVoe_GetNumOfRecordingDevices()
