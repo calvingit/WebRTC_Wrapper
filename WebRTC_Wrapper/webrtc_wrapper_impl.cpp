@@ -115,7 +115,7 @@ int LoganVoiceEngineImpl::LoganVoe_CreateChannel()
 {
     int channel = base->CreateChannel();
 
-    //¹¹½¨VoiceChanTrans
+    //ï¿½ï¿½ï¿½ï¿½VoiceChanTrans
     VoiceChannelTransport *voice_channel_transport(new VoiceChannelTransport(netw, channel));
     VoiceChanTrans vct;
     vct.channel = channel;
@@ -553,7 +553,7 @@ int LoganVoiceEngineImpl::LoganVoe_GetInputMute(int channel, bool& enabled)
 
 int LoganVoiceEngineImpl::LoganVoe_SetSystemOutputMute(bool enable)
 {
-    res = volume->SetSystemInputMute(enable);
+    res = volume->SetSystemOutputMute(enable);
     VALIDATE;
     return res;
 }
